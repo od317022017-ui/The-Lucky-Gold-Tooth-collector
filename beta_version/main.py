@@ -161,10 +161,12 @@ def Gameframe():
             else:
                 toothe_speed += 0.01  # увеличиваем скорость объекта
             evelius_grade = 1  # увеличиваем оценку evelius за каждый собранный зуб
+            evelius_start_time = pygame.time.get_ticks()
         elif object_pos[1] > window_size[1]:  # если объект упал вниз
             loses += 1
             object_pos = [randint(0, window_size[0] - 50), -50]
             evelius_grade = -1
+            evelius_start_time = pygame.time.get_ticks()
 
         # рисуем обьект только если не собран
         if running :
@@ -221,48 +223,45 @@ def Gameframe():
                 skin_level = 3
             # display evelius badge in the top-right when unlocked
             current_time = pygame.time.get_ticks()
-            if (current_time - evelius_start_time) / 1000 < 5 and game == True:
-                x = window_size[0] - evelius_image.get_width() - 10
-                y = 10
-                window.blit(evelius_image, (x, y))
-        
+
+            # choose correct evelius image based on grade and time
             if evelius_grade == -1:
-                x = window_size[0] - evelius_image.get_width() - 10
-                y = 10
-                window.blit(evelius_image, (x, y))
-                evelius_image = None
-                try:
-                    evelius_image = pygame.image.load(resource_path("evelius1.png")).convert_alpha()
-                    evelius_image = pygame.transform.scale(evelius_image, (150, 100))
-                except pygame.error:
+                # show bad rating for 5 seconds
+                if (current_time - evelius_start_time) / 1000 < 5:
                     evelius_image = None
-                if (current_time - evelius_start_time) / 1000 >= 5:
-                    evelius_grade = 0  # сбрасываем оценку evelius после отображения картинки
+                    try:
+                        evelius_image = pygame.image.load(resource_path("evelius1.png")).convert_alpha()
+                        evelius_image = pygame.transform.scale(evelius_image, (150, 100))
+                    except pygame.error:
+                        evelius_image = None
+                else:
+                    evelius_grade = 0
                     evelius_start_time = current_time
-            elif evelius_grade == 0:
-                x = window_size[0] - evelius_image.get_width() - 10
-                y = 10
-                window.blit(evelius_image, (x, y))
+            elif evelius_grade == 1:
+                # show good rating for 5 seconds
+                if (current_time - evelius_start_time) / 1000 < 5:
+                    evelius_image = None
+                    try:
+                        evelius_image = pygame.image.load(resource_path("evelius2.png")).convert_alpha()
+                        evelius_image = pygame.transform.scale(evelius_image, (150, 100))
+                    except pygame.error:
+                        evelius_image = None
+                else:
+                    evelius_grade = 0
+                    evelius_start_time = current_time
+            else:
+                # default evelius image
                 evelius_image = None
                 try:
                     evelius_image = pygame.image.load(resource_path("evelius3.png")).convert_alpha()
                     evelius_image = pygame.transform.scale(evelius_image, (150, 100))
                 except pygame.error:
                     evelius_image = None
-            elif evelius_grade == 1:
+
+            if evelius_image:
                 x = window_size[0] - evelius_image.get_width() - 10
                 y = 10
                 window.blit(evelius_image, (x, y))
-                evelius_image = None
-                try:
-                    evelius_image = pygame.image.load(resource_path("evelius2.png")).convert_alpha()
-                    evelius_image = pygame.transform.scale(evelius_image, (150, 100))
-                except pygame.error:
-                    evelius_image = None
-                # ждем 5 секунды, прежде чем сбросить оценку evelius обратно на 0
-                if (current_time - evelius_start_time) / 1000 >= 5:
-                    evelius_grade = 0  # сбрасываем оценку evelius после отображения картинки
-                    evelius_start_time = current_time
         if toothes_collected == 1000:  # easter egg для 1000 зубов
             win_surf = font.render("You are a true collector! You win!Press r to restart or q to quit", True, (255, 255, 0))
             window.blit(win_surf, win_surf.get_rect(center=(400, 300)))
