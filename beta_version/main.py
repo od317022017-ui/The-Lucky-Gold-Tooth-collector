@@ -155,41 +155,25 @@ def Gameframe():
         object_rect = pygame.Rect(object_pos[0], object_pos[1], 50, 50)
         if player_rect.colliderect(object_rect):
             toothes_collected += 1
-            current_time = pygame.time.get_ticks()
-            if current_time - last_collect_time < 1000:  # если собрал менее чем за 1 секунду
-                combo += 1
-            else:
-                combo = 1
-            last_collect_time = current_time                
-            if combo >= 2:
-                show_good = True
-                good_text = f"GOOD x{combo}"
-                good_start_time = current_time
-                toothes_collected += combo  # добавляем очки за комбо
-                combo = 0  # сбрасываем комбо после активации GOOD
             object_pos = [randint(0, window_size[0] - 50), -50]  # новый объект сверху
             if toothe_speed >= max_speed:
                 toothe_speed = max_speed
             else:
                 toothe_speed += 0.01  # увеличиваем скорость объекта
             evelius_grade = 1  # увеличиваем оценку evelius за каждый собранный зуб
-            collected = True
         elif object_pos[1] > window_size[1]:  # если объект упал вниз
             loses += 1
             object_pos = [randint(0, window_size[0] - 50), -50]
             evelius_grade = -1
-            combo = 0  # сбрасываем комбо при потере
-            collected = True  # тоже считаем как collected, чтобы не рисовать
 
         # рисуем обьект только если не собран
-        if running and not collected:
+        if running :
             if object_image:
                 window.blit(object_image, object_pos)
             else:
                 pygame.draw.circle(window, (255, 215, 0), object_pos, 25)
 
-        spawn = True  # флаг для разрешения движения объекта и проверки столкновения
-        if game == True and not collected:
+        if game == True:
             object_pos[1] += toothe_speed  # движение объекта вниз
             if loses >= 3:
                 lose_surf = pygame.Rect(300, 200, 200, 60)
@@ -237,11 +221,7 @@ def Gameframe():
                 skin_level = 3
             # display evelius badge in the top-right when unlocked
             current_time = pygame.time.get_ticks()
-            if show_good and (current_time - good_start_time) / 1000 < 2 and game == True:
-                # отображаем GOOD x{combo} в правом верхнем углу
-                good_surf = font.render(good_text, True, (255, 255, 255))
-                window.blit(good_surf, (window_size[0] - good_surf.get_width() - 10, 10))
-            elif (current_time - evelius_start_time) / 1000 < 5 and game == True:
+            if (current_time - evelius_start_time) / 1000 < 5 and game == True:
                 x = window_size[0] - evelius_image.get_width() - 10
                 y = 10
                 window.blit(evelius_image, (x, y))
